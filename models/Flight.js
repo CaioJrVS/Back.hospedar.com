@@ -4,15 +4,20 @@ const { Schema } = mongoose;
 
 const FlightSchema = new Schema({
   price: Number,
+  schedule:{
+    departing: Date,
+    arrival: Date
+  },
   route: {
     origin: String,
     destination: String,
   },
-  seats: [
+  passengers: [
     {
-      seat: String,
-    },
-  ],
+      Name: String,
+      Seat: String
+    }
+  ] 
 });
 
 module.exports = mongoose.model("Flight", FlightSchema);

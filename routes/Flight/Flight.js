@@ -12,7 +12,7 @@ router.get('/CardFlights', function(req, res, next) {
         console.log(docs);
         res.json(docs)
       }
-    });
+    }).limit(10);
 });
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });

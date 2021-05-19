@@ -16,6 +16,20 @@ router.get('/CardFlights', function(req, res, next) {
     }).limit(10);
 });
 
+router.get('/DestinationFlights', function(req, res, next) {
+    Flight.findOne({ 
+        route: {origin: req.query.origin, destination: req.query.destination}
+    }, (err, docs) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(docs);
+          console.log(req.params);
+          res.json(docs)
+        }
+    })
+})
+
 router.get('/HomeCardFlights', function(req, res, next) {
     Flight.find({})
         .or([

@@ -1,9 +1,33 @@
 const mongoose = require('mongoose');
 const Flight = require('../../models/Flight');
+const Amadeus = require("amadeus");
 
 var express = require('express');
 const { exists } = require('../../models/Flight');
 var router = express.Router();
+const { CLIENT_ID, CLIENT_SECRET } = require('../../config');
+
+const amadeus = new Amadeus({
+    clientId: CLIENT_ID,
+    clientSecret: CLIENT_SECRET
+});
+
+router.get('/Airports', async (req, res) => {
+    const { page, subType, keyword } = req.query;
+    // API call with params we requested from client app
+    const response = await amadeus.client.get("/v1/reference-data/locations", {
+      keyword,
+      subType,
+      "page[offset]": page * 10
+    });
+    // Sending response for client
+    console.log(JSON.parse(response.body));
+    try {
+      await res.json(JSON.parse(response.body));
+    } catch (err) {
+      await res.json(err);
+    }
+  });
 
 router.get('/CardFlights', function(req, res, next) {
     Flight.find({}, (err, docs) => {

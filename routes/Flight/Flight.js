@@ -29,6 +29,25 @@ router.get('/Airports', async (req, res) => {
     }
   });
 
+router.get('/FlightOffers', async (req, res) => {
+    const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
+    // API call with params we requested from client app
+    const response = await amadeus.client.get("/v2/shopping/flight-offers", {
+        originLocationCode, 
+        destinationLocationCode, 
+        departureDate, 
+        adults
+    });
+    
+    // Sending response for client
+    console.log(JSON.parse(response.body));
+    try {
+      await res.json(JSON.parse(response.body));
+    } catch (err) {
+      await res.json(err);
+    }
+  });
+
 router.get('/CardFlights', function(req, res, next) {
     Flight.find({}, (err, docs) => {
       if (err) {

@@ -29,6 +29,24 @@ router.get('/Airports', async (req, res) => {
     }
   });
 
+router.get('/SeatMaps', async (req, res) => {
+    amadeus.shopping.flightOffersSearch.get({
+        originLocationCode: 'SYD',
+        destinationLocationCode: 'BKK',
+        departureDate: '2021-08-01',
+        adults: '1'
+    }).then(function(response){
+        return amadeus.shopping.seatmaps.post(
+            JSON.stringify({ 'data': [response.data[0]] })
+        );
+    }).then(function(response){
+      console.log(response.data);
+      res.json(response.data);
+    }).catch(function(responseError){
+      console.log(responseError);
+    });
+});
+
 router.get('/FlightOffers', async (req, res) => {
     const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
     // API call with params we requested from client app
@@ -40,7 +58,6 @@ router.get('/FlightOffers', async (req, res) => {
     });
     
     // Sending response for client
-    console.log(JSON.parse(response.body));
     try {
       await res.json(JSON.parse(response.body));
     } catch (err) {

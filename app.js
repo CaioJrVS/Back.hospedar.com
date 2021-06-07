@@ -41,7 +41,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-//app.use('/hotel', hotelRouter);
 app.use("/api/flight", flightRouter);
 
 // catch 404 and forward to error handler

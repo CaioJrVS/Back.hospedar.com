@@ -69,9 +69,12 @@ router.get('/Price', async (req, res) => {
 })
 
 router.get('/SeatMaps', async (req, res) => {
-
-    const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
-
+    let { origin, destination, departureDate, adults } = req.query;
+    console.log(departureDate)
+    origin = origin.toUpperCase();
+    destination = destination.toUpperCase();
+    const originLocationCode = IATA[origin]
+    const destinationLocationCode = IATA[destination]
     amadeus.shopping.flightOffersSearch.get({
         originLocationCode,
         destinationLocationCode,
@@ -82,12 +85,13 @@ router.get('/SeatMaps', async (req, res) => {
             JSON.stringify({ 'data': [response.data[0]] })
         );
     }).then(function(response){
-      console.log(response.data);
-      res.json(response.data);
+        console.log(response.data);
+        res.json(response.data);
     }).catch(function(responseError){
-      console.log(responseError);
+        console.log(responseError);
     });
 });
+
 
 router.get('/FlightOffers', async (req, res) => {
     const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;

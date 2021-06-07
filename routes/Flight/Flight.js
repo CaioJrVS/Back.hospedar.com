@@ -7,10 +7,24 @@ const { exists } = require('../../models/Flight');
 var router = express.Router();
 const { CLIENT_ID, CLIENT_SECRET } = require('../../config');
 
+const IATA = require('../../public/shared/IATAcodesWorld.json');
+
 const amadeus = new Amadeus({
     clientId: CLIENT_ID,
     clientSecret: CLIENT_SECRET
 });
+
+router.get('/Inspiration', async (req, res) => {
+    const {origin} = req.query;
+    await amadeus.shopping.flightDestinations.get({
+        origin
+    }).then(function(response){
+        console.log(response.data);
+        res.json(response.data);
+      }).catch(function(responseError){
+        console.log(responseError);
+    });
+})
 
 router.get('/Airports', async (req, res) => {
     const { page, subType, keyword } = req.query;
@@ -29,12 +43,40 @@ router.get('/Airports', async (req, res) => {
     }
   });
 
-router.get('/SeatMaps', async (req, res) => {
+router.get('/Price', async (req, res) => {
+    const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
+
     amadeus.shopping.flightOffersSearch.get({
-        originLocationCode: 'SYD',
-        destinationLocationCode: 'BKK',
-        departureDate: '2021-08-01',
-        adults: '1'
+        originLocationCode,
+        destinationLocationCode,
+        departureDate,
+        adults
+    }).then(function(response){
+        return amadeus.shopping.flightOffers.pricing.post(
+        JSON.stringify({
+            'data': {
+            'type': 'flight-offers-pricing',
+            'flightOffers': [response.data[0]]
+            }
+        })
+        )
+    }).then(function(response){
+        console.log(response.data);
+        res.json(response.data.flightOffers[0].price);
+    }).catch(function(responseError){
+        console.log(responseError);
+    }); 
+})
+
+router.get('/SeatMaps', async (req, res) => {
+
+    const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
+
+    amadeus.shopping.flightOffersSearch.get({
+        originLocationCode,
+        destinationLocationCode,
+        departureDate,
+        adults
     }).then(function(response){
         return amadeus.shopping.seatmaps.post(
             JSON.stringify({ 'data': [response.data[0]] })
@@ -77,18 +119,26 @@ router.get('/CardFlights', function(req, res, next) {
 });
 
 router.get('/DestinationFlights', function(req, res, next) {
-    Flight.findOne({ 
-        route: {origin: req.query.origin, destination: req.query.destination}
-    }, (err, docs) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log(docs);
-          console.log(req.params);
-          res.json(docs)
-        }
-    })
-})
+    let { origin, destination, dataIda, seats } = req.query;
+    origin = origin.toUpperCase();
+    destination = destination.toUpperCase();
+
+    const originLocationCode = IATA[origin];
+    const destinationLocationCode = IATA[destination];
+    
+    amadeus.shopping.flightOffersSearch.get({
+        originLocationCode,
+        destinationLocationCode,
+        departureDate: dataIda,
+        adults: seats
+    }).then(function(response){
+        console.log(response.data);
+        res.json(response.data);
+    }).catch(function(responseError){
+        console.log(responseError);
+    });
+
+});
 
 router.get('/HomeCardFlights', function(req, res, next) {
     Flight.find({})

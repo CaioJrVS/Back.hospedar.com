@@ -14,9 +14,9 @@ const amadeus = new Amadeus({
     clientSecret: CLIENT_SECRET
 });
 
-router.get('/Inspiration', async (req, res) => {
+router.get('/Inspiration', (req, res) => {
     const {origin} = req.query;
-    await amadeus.shopping.flightDestinations.get({
+    amadeus.shopping.flightDestinations.get({
         origin
     }).then(function(response){
         console.log(response.data);
@@ -70,7 +70,12 @@ router.get('/Price', async (req, res) => {
 
 router.get('/SeatMaps', async (req, res) => {
 
-    const { originLocationCode, destinationLocationCode, departureDate, adults } = req.query;
+    let { origin, destination, departureDate, adults } = req.query;
+    origin = origin.toUpperCase();
+    destination = destination.toUpperCase();
+
+    const originLocationCode = IATA[origin];
+    const destinationLocationCode = IATA[destination];
 
     amadeus.shopping.flightOffersSearch.get({
         originLocationCode,
@@ -119,7 +124,8 @@ router.get('/CardFlights', function(req, res, next) {
 });
 
 router.get('/DestinationFlights', function(req, res, next) {
-    let { origin, destination, dataIda, seats } = req.query;
+    let { origin, destination, departureDate, adults } = req.query;
+    console.log(departureDate, adults);
     origin = origin.toUpperCase();
     destination = destination.toUpperCase();
 
@@ -129,8 +135,8 @@ router.get('/DestinationFlights', function(req, res, next) {
     amadeus.shopping.flightOffersSearch.get({
         originLocationCode,
         destinationLocationCode,
-        departureDate: dataIda,
-        adults: seats
+        departureDate,
+        adults
     }).then(function(response){
         console.log(response.data);
         res.json(response.data);

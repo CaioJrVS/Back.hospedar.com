@@ -75,17 +75,6 @@ router.get('/SeatMaps', async (req, res) => {
     });
 });
 
-router.get('/CardFlights', function(req, res, next) {
-    Flight.find({}, (err, docs) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log(docs);
-        res.json(docs)
-      }
-    }).limit(10);
-});
-
 router.get('/DestinationFlights', function(req, res, next) {
     let { origin, destination, departureDate, adults } = req.query;
     console.log(departureDate, adults);
